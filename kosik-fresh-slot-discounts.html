@@ -121014,6 +121014,12 @@ body :where([data-proto='app-icon']) {
     Vue.reactive({
       /** 'plus' | 'benjaminek' | 'voucher' | 'none' */
       reason: 'plus',
+      /** PROTO layout variant: 'a' = Plus status row above the delivery tile (default),
+       *  'b' = Plus status + discount strip inside the tile (DS TileExtension); ?variant=b */
+      variant:
+        new URLSearchParams(window.location.search).get('variant')?.toLowerCase() === 'b'
+          ? 'b'
+          : 'a',
       /** Košík Plus package state shown in the strip (unconfirmed demo values) */
       plus: { daysLeft: 17, packageDays: 33 },
       reasons: SLOT_DISCOUNT_REASONS,
@@ -121649,6 +121655,11 @@ body :where([data-proto='app-icon']) {
   // no progress bar, so the bar is built from tokens. Shown only for the Plus reason.
   // ---------------------------------------------------------------------------
   ProtoKit.PlusStatusStrip = {
+    props: {
+      /** variant B: inside a DS TileExtension — no own side padding, 18 px logo, 6 px bar,
+       *  "17 dní" bold as a whole (Figma 3096:46720) */
+      embedded: { type: Boolean, default: false },
+    },
     setup() {
       const state = ProtoKit.slotDiscount
       const visible = computed(() => state.reason === 'plus')
@@ -121660,17 +121671,24 @@ body :where([data-proto='app-icon']) {
     template: `
       <div
         v-if="visible"
-        class="tw-flex tw-flex-col tw-gap-2 tw-px-3"
+        class="tw-flex tw-flex-col tw-gap-2"
+        :class="{ 'tw-px-3': !embedded }"
         data-tid="plus-status-strip">
         <div class="tw-flex tw-items-end tw-justify-between tw-gap-3">
           <img
             :src="logo"
             alt="Košík Plus"
-            class="tw-h-5 tw-w-auto">
+            class="tw-w-auto"
+            :class="embedded ? 'tw-h-[18px]' : 'tw-h-5'">
           <span class="tw-text-style-text tw-text-ds-title">
             Výhodná doprava ještě
-            <span class="tw-font-ds-stronger">{{ state.plus.daysLeft }}</span>
-            {{ daysWord(state.plus.daysLeft) }}
+            <span
+              v-if="embedded"
+              class="tw-font-ds-stronger">{{ state.plus.daysLeft }} {{ daysWord(state.plus.daysLeft) }}</span>
+            <template v-else>
+              <span class="tw-font-ds-stronger">{{ state.plus.daysLeft }}</span>
+              {{ daysWord(state.plus.daysLeft) }}
+            </template>
           </span>
         </div>
         <div
@@ -121680,7 +121698,8 @@ body :where([data-proto='app-icon']) {
           aria-valuemin="0"
           :aria-valuemax="state.plus.packageDays"
           :aria-valuetext="state.plus.daysLeft + ' ' + daysWord(state.plus.daysLeft)"
-          class="tw-flex tw-h-2 tw-justify-end tw-overflow-hidden tw-rounded-ds-sm tw-bg-ds-neutral-20">
+          class="tw-flex tw-justify-end tw-overflow-hidden tw-rounded-ds-sm tw-bg-ds-neutral-20"
+          :class="embedded ? 'tw-h-1.5' : 'tw-h-2'">
           <div
             class="tw-h-full tw-rounded-ds-sm tw-bg-ds-accent-green"
             :style="{ width: share + '%' }"></div>
@@ -122948,11 +122967,29 @@ body :where([data-proto='app-icon']) {
   // the Figma card. Without a discount the tile is rendered alone, as in production.
   // ---------------------------------------------------------------------------
   const DiscountTileFrame = {
-    props: { active: { type: Boolean, default: false } },
+    props: {
+      active: { type: Boolean, default: false },
+      /** PROTO variant 'b' (Figma 3096:44719): the extension is also used before a window
+       *  is chosen (Plus status), keeps the DS divider and the 12 px padding all round,
+       *  and the "required" outline goes round the whole card */
+      variant: { type: String, default: 'a' },
+      required: { type: Boolean, default: false },
+    },
+    computed: {
+      frameClasses() {
+        if (this.variant !== 'b') return { tileWrapper: 'tw-border-b-0', extension: 'tw-px-3 tw-pb-3 tw-pt-0' }
+        return {
+          base: this.required
+            ? 'tw-border tw-border-ds-neutral-80'
+            : 'tw-border tw-border-transparent',
+          extension: 'tw-p-3',
+        }
+      },
+    },
     template: `
       <ds-tile-extension
         v-if="active"
-        :classes="{ tileWrapper: 'tw-border-b-0', extension: 'tw-px-3 tw-pb-3 tw-pt-0' }"
+        :classes="frameClasses"
         data-tid="delivery-tile-frame">
         <template #tile><slot name="tile"></slot></template>
         <slot name="extension"></slot>
@@ -122991,6 +123028,7 @@ body :where([data-proto='app-icon']) {
       'fast-delivery-badge': FastDeliveryBadge,
       'relative-delivery-badge': RelativeDeliveryBadge,
       'discount-tile-frame': DiscountTileFrame,
+      'plus-status-strip': ProtoKit.PlusStatusStrip,
     },
 
     setup(props, { emit, expose }) {
@@ -123026,6 +123064,17 @@ body :where([data-proto='app-icon']) {
       const percentText = computed(() => '\u2212' + discount.value?.percent + '\u00a0%')
       const savingsText = computed(() => formatSlotPrice(discount.value?.savings))
       const showDiscount = computed(() => reduced.value && !props.hidePrice)
+      // PROTO variant B: the Plus status sits in the tile's extension while there is no
+      // discount strip to show (before a window is chosen, or a window that is free anyway)
+      const isVariantB = computed(() => ProtoKit.slotDiscount.variant === 'b')
+      const showPlusStatus = computed(
+        () =>
+          isVariantB.value &&
+          ProtoKit.slotDiscount.reason === 'plus' &&
+          !props.hidePrice &&
+          !showDiscount.value,
+      )
+      const frameActive = computed(() => showDiscount.value || showPlusStatus.value)
       const discountSrText = computed(
         () =>
           'Cena ' +
@@ -123078,6 +123127,9 @@ body :where([data-proto='app-icon']) {
       const transportError = computed(() => props.transportMessage)
 
       const isRequired = computed(() => props.isTransportRequired && !selectedTimeslot.value)
+      // with a frame the "required" outline is drawn round the whole card (variant B)
+      const tileRequired = computed(() => isRequired.value && !frameActive.value)
+      const frameRequired = computed(() => isRequired.value && frameActive.value)
 
       const tileRef = ref(null)
       const pulseAnimation = computed(() => tileRef.value?.pulseAnimation)
@@ -123095,6 +123147,12 @@ body :where([data-proto='app-icon']) {
         percentText,
         savingsText,
         showDiscount,
+        showPlusStatus,
+        frameActive,
+        isVariantB,
+        tileRequired,
+        frameRequired,
+        slotDiscountState: ProtoKit.slotDiscount,
         discountSrText,
         displayPrice,
         shouldHighlightPrice,
@@ -123118,11 +123176,14 @@ body :where([data-proto='app-icon']) {
             {{ transportError?.message }}
           </span>
         </template>
-        <discount-tile-frame :active="showDiscount">
+        <discount-tile-frame
+          :active="frameActive"
+          :variant="slotDiscountState.variant"
+          :required="frameRequired">
         <template #tile>
         <checkout-tile
           ref="tileRef"
-          :required="isRequired"
+          :required="tileRequired"
           class="tw-h-full"
           readonly-on-additional-order
           data-tid="delivery-days-tile"
@@ -123238,6 +123299,13 @@ body :where([data-proto='app-icon']) {
               <span class="tw-font-ds-semibold">{{ savingsText }}</span>
             </span>
           </div>
+          <\!-- PROTO variant B: the Košík Plus status inside the tile (Figma 3096:46720) -->
+          <plus-status-strip
+            v-else-if="showPlusStatus"
+            embedded
+            class="tw-cursor-pointer"
+            data-tid="delivery-tile-plus-status"
+            @click="emits('click')"></plus-status-strip>
         </template>
         </discount-tile-frame>
       </ds-ribbon>
@@ -134991,7 +135059,7 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
                   <!-- PROTO: the active Košík Plus package (logo, "Výhodná doprava ještě
                        17 dní", validity bar) — in production this is ConvenienceFeeTile's
                        status, which the kit does not port. Visible for the Plus reason. -->
-                  <plus-status-strip></plus-status-strip>
+                  <plus-status-strip v-if="discountState.variant === 'a'"></plus-status-strip>
 
                   <!-- 4a. TimeslotsManagement — the tile with the chosen window, and
                        the whole TransportDrawer (day tabs, slot grid, legend, shipper)
@@ -135140,9 +135208,8 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
           class="tw-mb-2 tw-w-64 tw-rounded-ds-xl tw-bg-ds-neutral-90 tw-p-3 tw-text-ds-neutral-0 tw-shadow-lg"
           role="radiogroup"
           aria-label="Důvod slevy na dopravu">
-          <p class="tw-mb-2 tw-text-style-sm">
-            Pouze prototyp, není součástí návrhu. Důvod slevy na dopravu:
-          </p>
+          <p class="tw-mb-2 tw-text-style-sm-strong">Pouze prototyp, není součástí návrhu.</p>
+          <p class="tw-mb-2 tw-text-style-sm">Důvod slevy na dopravu:</p>
           <button
             v-for="option in switchOptions"
             :key="option.id"
@@ -135158,13 +135225,34 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
             @click="discountState.reason = option.id">
             {{ option.label }}
           </button>
+          <div
+            class="tw-mt-3 tw-border-t tw-border-ds-neutral-70 tw-pt-3"
+            role="radiogroup"
+            aria-label="Varianta dlaždice času doručení">
+            <p class="tw-mb-2 tw-text-style-sm">Varianta dlaždice (URL: ?variant=b):</p>
+            <button
+              v-for="option in variantOptions"
+              :key="option.id"
+              type="button"
+              role="radio"
+              :aria-checked="discountState.variant === option.id"
+              class="tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
+              :class="
+                discountState.variant === option.id
+                  ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger'
+                  : 'tw-text-ds-neutral-0'
+              "
+              @click="discountState.variant = option.id">
+              {{ option.label }}
+            </button>
+          </div>
         </div>
         <button
           type="button"
           class="tw-flex tw-h-10 tw-items-center tw-rounded-full tw-bg-ds-neutral-90 tw-px-4 tw-text-style-sm-strong tw-text-ds-neutral-0 tw-shadow-lg"
           :aria-expanded="switchOpen"
           @click="switchOpen = !switchOpen">
-          Prototyp: {{ switchLabel }}
+          Prototyp: {{ switchLabel }} · {{ discountState.variant.toUpperCase() }}
         </button>
       </div>
 
@@ -137672,6 +137760,20 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
             { id: 'voucher', label: 'Voucher na dopravu zdarma' },
             { id: 'none', label: 'Bez slevy' },
           ]
+          const variantOptions = [
+            { id: 'a', label: 'A: Plus nad dlaždicí' },
+            { id: 'b', label: 'B: Plus uvnitř dlaždice' },
+          ]
+          // keep ?variant=b in the address bar (shareable), the hash route is untouched
+          Vue.watch(
+            () => ProtoKit.slotDiscount.variant,
+            (variant) => {
+              const url = new URL(window.location.href)
+              if (variant === 'b') url.searchParams.set('variant', 'b')
+              else url.searchParams.delete('variant')
+              window.history.replaceState(window.history.state, '', url)
+            },
+          )
           const switchLabel = computed(
             () =>
               switchOptions.find((option) => option.id === ProtoKit.slotDiscount.reason)?.label ??
@@ -137969,6 +138071,7 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
             slotAnnouncement,
             switchOpen,
             switchOptions,
+            variantOptions,
             switchLabel,
             discountState: ProtoKit.slotDiscount,
             setEarlyDelivery,
