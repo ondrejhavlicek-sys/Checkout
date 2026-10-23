@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Výběr času doručení – prototyp (varianta 4)</title>
+<style>
+:root{
+  --purple:#6b1d78; --purple-light:#f3e3f6; --purple-mid:#c99dd6;
+  --green:#136940; --green-bg:#def5e7;
+  --ink:#222; --grey:#666; --line:#e0e0e0; --bg:#f6f6f6; --card:#fff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;background:#d9d9d9;color:var(--ink);display:flex;justify-content:center}
+.phone{width:393px;min-height:100vh;background:var(--bg);position:relative;overflow-x:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.screen{display:none;padding-bottom:140px}
+.screen.active{display:block}
+header{display:flex;align-items:center;gap:12px;padding:18px 16px 8px}
+.back{width:32px;height:32px;border-radius:50%;background:#e8e8e8;display:grid;place-items:center;font-size:18px}
+header h1{flex:1;text-align:center;font-size:15px;font-weight:500;margin-right:44px}
+.plus{margin:12px 16px 0}
+.plus .row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.plus b{color:var(--purple);font-size:15px}.plus b span{color:var(--green)}
+.bar{display:flex;gap:4px;margin-top:6px}.bar i{flex:1;height:5px;border-radius:3px;background:#ccc}.bar i.on{flex:2;background:#1c8a54}
+.addr{margin:18px 16px 0;font-size:13px}.addr a{color:var(--purple);text-decoration:underline;font-weight:500}
+.days{display:flex;gap:8px;margin:20px 16px 0}
+.day{flex:1;border:1px solid #bbb;background:#fff;border-radius:8px;padding:6px 0 7px;text-align:center}
+.day small{display:block;font-size:10px;color:var(--grey)}.day strong{font-size:15px}
+.day.sel{background:var(--purple);color:#fff;border-color:var(--purple)}.day.sel small{color:#eadcef}
+.slots{margin:24px 16px 0;display:flex;flex-direction:column;gap:16px}
+.group{border-radius:12px}
+.group.express{background:#e4cdea;border:1px solid var(--purple-mid);padding:6px}
+.group.priority{background:var(--purple-light);border:1px solid #dcc0e4;padding:6px}
+.tag{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;padding:2px 4px 6px}
+.tag b{font-size:14px;color:var(--purple);font-weight:600}.tag svg{width:18px;height:18px}
+.cols{display:grid;gap:8px}
+.col{display:flex;flex-direction:column;gap:8px}
+.slot{flex:1;background:var(--card);border-radius:8px;border:2px solid transparent;padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;min-height:56px;transition:border-color .12s,box-shadow .12s}
+.slot.wide{flex-direction:row;justify-content:space-between;padding:12px 14px;min-height:50px}
+.slot .t{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.slot.wide .t{font-size:13px}
+.ic{width:18px;height:18px;display:inline-block}
+.price{display:flex;align-items:baseline;gap:5px;justify-content:center;white-space:nowrap}
+.price .n{font-size:14px;font-weight:700;color:var(--green)}
+.price .o{font-size:10px;color:var(--grey);text-decoration:line-through}
+.slot.sold{background:#e8e8e8;color:#888;pointer-events:none}
+.slot.sold .t{font-weight:400}.slot.sold small{font-size:12px}
+.slot:not(.sold):active{transform:scale(.985)}
+.slot.selected{border-color:var(--purple);box-shadow:0 0 0 1px var(--purple)}
+.legend{margin:20px 16px 0;font-size:12px;display:flex;flex-direction:column;gap:10px}
+.legend div{display:flex;gap:8px;align-items:flex-start}.legend svg{flex:none;width:18px;height:18px}
+.dodo{margin:20px 16px 0;text-align:center;font-size:13px}.dodo b{color:#1aa583;letter-spacing:1px}
+.dock{position:fixed;bottom:0;width:393px;background:#fff;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.save{display:none;background:var(--purple-light);padding:10px 16px;align-items:center;gap:10px;justify-content:space-between}
+.save.show{display:flex;animation:up .2s ease}
+@keyframes up{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.save .l strong{display:block;font-size:14px}
+.save .l span{font-size:12px;color:var(--purple);font-weight:500}.save .l s{color:var(--grey);margin-right:6px;font-weight:400}
+.pill{background:var(--purple);color:#fff;font-weight:700;font-size:12px;border-radius:6px;padding:4px 8px}
+.chk{display:flex;gap:10px;align-items:center;font-size:10px;color:var(--grey);padding:14px 16px 0}
+.chk i{width:24px;height:24px;border:1px solid #bbb;border-radius:6px;flex:none}
+.cta{display:block;margin:12px 16px 24px;width:calc(100% - 32px);height:48px;border-radius:12px;background:var(--purple);color:#fff;font-weight:600;font-size:16px}
+.cta:disabled{background:#c7b0cd}
+/* cart */
+.cart{padding:0 16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
+.card h2{font-size:12px;font-weight:500;color:var(--grey);margin-bottom:8px}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.crow strong{font-size:14px}.crow small{display:block;font-size:12px;color:var(--grey);margin-top:2px}
+.cp{text-align:right}.cp .o{display:block;font-size:12px;color:var(--grey);text-decoration:line-through}.cp .n{font-size:17px;font-weight:700;color:var(--green)}
+.saving{margin-top:10px;background:var(--purple-light);color:var(--purple);font-size:12px;font-weight:500;padding:6px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.sum{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}.sum.tot{font-weight:700;font-size:16px;border-top:1px solid var(--line);margin-top:6px;padding-top:12px}
+.change{margin-top:12px;color:var(--purple);font-weight:500;font-size:13px;text-decoration:underline}
+.note{position:fixed;left:50%;transform:translateX(-50%);top:8px;font-size:11px;background:#222;color:#fff;padding:4px 10px;border-radius:12px;opacity:.75;z-index:9}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- Slot selection -->
+<section class="screen active" id="s1">
+  <header><button class="back">‹</button><h1>Dostupné časy doručení</h1></header>
+  <div class="plus">
+    <div class="row"><b>Košík <span>Plus</span></b><span>Výhodná doprava ještě <strong>17</strong> dní</span></div>
+    <div class="bar"><i></i><i class="on"></i></div>
+  </div>
+  <div class="addr">Místo doručení: <a>Sokolovská 1079/11, Praha 8 – Karlín</a></div>
+  <div class="days" id="days"></div>
+  <div class="slots" id="slots"></div>
+  <div class="legend">
+    <div><svg viewBox="0 0 20 20"><path d="M11 1 3 11h5l-1 8 8-10h-5z" fill="#4a1a5c"/></svg><span><b>Expresso.</b> Expresní doručení do 90 minut od objednání.</span></div>
+    <div><svg viewBox="0 0 20 20"><path d="m10 1 2.5 5.5 6 .7-4.4 4 1.2 5.9L10 13.2 4.7 17l1.2-5.900L1.500 7.200l6-.7z" fill="#b98ac7"/></svg><span><b>Prioritní doručení.</b> Nejdřívější dostupné časy doručení.</span></div>
+    <div><svg viewBox="0 0 20 20" fill="none" stroke="#8a5a9a" stroke-width="1.6"><circle cx="10" cy="10" r="7.500"/><path d="M10 5.500V10l3 2"/></svg><span><b>Pospěšte si.</b> Označený čas bude brzy vyprodán.</span></div>
+    <div><svg viewBox="0 0 20 20"><path d="M3 17C3 8 9 3 17 3c0 8-5 14-14 14z" fill="#a8d5b5"/></svg><span><b>Eko doprava.</b> Šetřete přírodu a využijte termín, kdy jedeme kolem vás.</span></div>
+  </div>
+  <div class="dodo">Dopravu zajišťujeme ve spolupráci s <b>DODO</b></div>
+  <div class="dock">
+    <div class="save" id="save">
+      <div class="l"><strong id="saveTitle"></strong><span><s id="saveOld"></s>Díky Košík Plus ušetříte <span id="saveAmt"></span></span></div>
+      <span class="pill">−50 %</span>
+    </div>
+    <div class="chk"><i></i><span>Nákup můžu <b>převzít až o 30 minut dřív</b>, pokud bude mít kurýr náskok.</span></div>
+    <button class="cta" id="confirm" disabled>Potvrdit čas doručení</button>
+  </div>
+</section>
+
+<!-- Cart -->
+<section class="screen" id="s2">
+  <header><button class="back" id="back2">‹</button><h1>Košík</h1></header>
+  <div class="cart">
+    <div class="card"><h2>Doprava</h2>
+      <div class="crow">
+        <div><strong id="cDay"></strong><small id="cTime"></small></div>
+        <div class="cp"><span class="o" id="cOld"></span><span class="n" id="cNew"></span></div>
+      </div>
+      <div class="saving"><span>Díky Košík Plus ušetříte <b id="cSave"></b></span><span class="pill">−50 %</span></div>
+      <button class="change" id="change">Změnit čas doručení</button>
+    </div>
+    <div class="card">
+      <div class="sum"><span>Zboží</span><span>1 248,00 Kč</span></div>
+      <div class="sum"><span>Doprava</span><span id="sumShip"></span></div>
+      <div class="sum tot"><span>Celkem</span><span id="sumTot"></span></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+const fmt=n=>n.toFixed(2).replace('.',',').replace(',00',',00')+' Kč';
+const fmtO=n=>n+' Kč';
+const days=[['Dnes','27. 3.'],['Zítra','28. 3.'],['Sobota','29. 3.'],['Neděle','30. 3.']];
+const IC={
+ flash:'<svg class="ic" viewBox="0 0 20 20"><path d="M11 1 3 11h5l-1 8 8-10h-5z" fill="#b98ac7"/></svg>',
+ star:'<svg class="ic" viewBox="0 0 20 20"><path d="m10 1 2.5 5.500 6 .7-4.400 4 1.200 5.900L10 13.200 4.700 17l1.200-5.900L1.500 7.200l6-.7z" fill="#b98ac7"/></svg>',
+ clock:'<svg class="ic" viewBox="0 0 20 20" fill="none" stroke="#9a6aaa" stroke-width="1.600"><circle cx="10" cy="10" r="7.500"/><path d="M10 5.500V10l3 2"/></svg>',
+ leaf:'<svg class="ic" viewBox="0 0 20 20"><path d="M3 17C3 8 9 3 17 3c0 8-5 14-14 14z" fill="#a8d5b5"/></svg>'};
+let state={day:0,slot:null};
+const S=(time,old,o={})=>({time,old,...o});
+const groups=[
+ {cls:'express',tag:[IC.flash,'Expresso','do 90 minut u vás doma'],cols:[[ S('Do 90 minut od objednání',149,{wide:1,icons:IC.flash+IC.clock}) ]],grid:'1fr'},
+ {cls:'priority',tag:[IC.star,'Prioritní','nejdřívější časy doručení'],
+  pre:[S('15:30 - 16:00',129,{wide:1,icons:IC.star+IC.clock})],
+  cols:[[S('16:00 - 16:30',129,{icons:IC.star+IC.clock}),S('16:30 - 17:00',129,{icons:IC.star})],[S('16:00 - 17:00',129,{icons:IC.star+IC.clock})]],grid:'1fr 1fr'},
+ {cls:'',cols:[[S('17:00 - 17:30',99),S('17:30 - 18:00',99)],[S('17:00 - 18:00',99)]],grid:'1fr 1fr'},
+ {cls:'',cols:[[S('18:00 - 18:30',79),S('18:30 - 19:00',79),S('19:00 - 19:30',79),S('19:30 - 20:00',79)],[S('18:00 - 19:00',79),S('19:00 - 20:00',79,{icons:IC.leaf})],[S('18:00 - 20:00',79)]],grid:'1fr 1fr 1fr'},
+ {cls:'',cols:[[S('20:00 - 20:30',59),S('20:30 - 21:00',59),S('21:00 - 21:30',59),S('21:30 - 22:00',59)],[S('20:00 - 21:00',59,{sold:1}),S('21:00 - 22:00',59,{icons:IC.leaf})],[S('20:00 - 22:00',59)]],grid:'1fr 1fr 1fr'}
+];
+const $=s=>document.querySelector(s);
+function slotEl(s){
+  const b=document.createElement('button');
+  b.className='slot'+(s.wide?' wide':'')+(s.sold?' sold':'');
+  const key=state.day+'|'+s.time;
+  if(s.sold){b.innerHTML=`<span class="t">${s.time.replace(/ - /g,' - ')}</span><small>Vyprodáno</small>`;return b;}
+  const price=`<span class="price"><span class="n">${fmt(s.old/2)}</span><span class="o">${s.old}</span></span>`;
+  const time=`<span class="t">${s.time}${s.wide?'':''}</span>`;
+  b.innerHTML=s.wide?`<span class="t">${s.time}${s.icons?' '+s.icons:''}</span>${price}`
+    :`<span class="t">${s.time}</span>${s.icons?`<span>${s.icons}</span>`:''}${price}`;
+  if(state.slot&&state.slot.key===key)b.classList.add('selected');
+  b.onclick=()=>{state.slot={key,time:s.time,old:s.old};render();};
+  return b;
+}
+function render(){
+  $('#days').innerHTML='';
+  days.forEach((d,i)=>{const b=document.createElement('button');b.className='day'+(i===state.day?' sel':'');b.innerHTML=`<small>${d[0]}</small><strong>${d[1]}</strong>`;b.onclick=()=>{state.day=i;state.slot=null;render();};$('#days').appendChild(b);});
+  const root=$('#slots');root.innerHTML='';
+  groups.forEach(g=>{
+    const el=document.createElement('div');el.className='group '+g.cls;
+    if(g.tag){const t=document.createElement('div');t.className='tag';t.innerHTML=`${g.tag[0]}<b>${g.tag[1]}</b><span>${g.tag[2]}</span>`;el.appendChild(t);}
+    const wrap=document.createElement('div');wrap.style.cssText='display:flex;flex-direction:column;gap:8px';
+    (g.pre||[]).forEach(s=>wrap.appendChild(slotEl(s)));
+    const grid=document.createElement('div');grid.className='cols';grid.style.gridTemplateColumns=g.grid;
+    g.cols.forEach(c=>{const col=document.createElement('div');col.className='col';c.forEach(s=>col.appendChild(slotEl(s)));grid.appendChild(col);});
+    wrap.appendChild(grid);el.appendChild(wrap);root.appendChild(el);
+  });
+  const s=state.slot, save=$('#save');
+  $('#confirm').disabled=!s;
+  if(s){save.classList.add('show');
+    $('#saveTitle').textContent=`${days[state.day][0]} ${s.time.replace(/ - /,' – ')} · ${fmt(s.old/2)}`;
+    $('#saveOld').textContent=fmtO(s.old);$('#saveAmt').textContent=fmt(s.old/2);
+  } else save.classList.remove('show');
+}
+$('#confirm').onclick=()=>{
+  const s=state.slot, n=s.old/2;
+  $('#cDay').textContent='Doprava · '+days[state.day][0]+' '+days[state.day][1];
+  $('#cTime').textContent=s.time.startsWith('Do 90')?'Expresso do 90 minut':'Příjezd v '+s.time.replace(/ - /,' – ');
+  $('#cOld').textContent=fmtO(s.old);$('#cNew').textContent=fmt(n);$('#cSave').textContent=fmt(n);
+  $('#sumShip').innerHTML=`<s style="color:#666;font-size:12px;margin-right:6px">${fmtO(s.old)}</s>${fmt(n)}`;
+  $('#sumTot').textContent=fmt(1248+n);
+  $('#s1').classList.remove('active');$('#s2').classList.add('active');window.scrollTo(0,0);
+};
+const back=()=>{$('#s2').classList.remove('active');$('#s1').classList.add('active');};
+$('#back2').onclick=back;$('#change').onclick=back;
+render();
+</script>
+</body>
+</html>
