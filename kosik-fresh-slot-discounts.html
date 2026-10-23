@@ -121709,6 +121709,36 @@ body :where([data-proto='app-icon']) {
   }
 
   // ---------------------------------------------------------------------------
+  // PROTOTYPE ONLY — <slot-discount-chip>: the split chip of the Figma (reason icon in a
+  // grey cell + the price in a light-green cell). Used by the drawer cell, the delivery
+  // tile and the transport row of the price summary, so the three look identical.
+  // The icon alone does not carry the reason: callers add visually hidden text.
+  // ---------------------------------------------------------------------------
+  ProtoKit.SlotDiscountChip = {
+    props: {
+      /** an entry of ProtoKit.slotDiscount.reasons ({ icon, iconStyle }) */
+      reason: { type: Object, required: true },
+      text: { type: String, required: true },
+    },
+    template: `
+      <span
+        class="tw-inline-flex tw-h-6 tw-overflow-hidden tw-rounded-ds-sm"
+        data-tid="slot-discount-chip">
+        <span class="tw-flex tw-items-center tw-bg-ds-neutral-5 tw-px-1.5 tw-text-ds-primary">
+          <component
+            :is="reason.icon"
+            size="xs"
+            :style="reason.iconStyle"></component>
+        </span>
+        <span
+          class="tw-flex tw-items-center tw-bg-ds-tint-highlight-green tw-px-1.5 tw-text-style-strong tw-text-ds-state-success">
+          {{ text }}
+        </span>
+      </span>
+    `,
+  }
+
+  // ---------------------------------------------------------------------------
   // src/components/DeliverySlots/DeliverySlotAvailability.vue
   // ---------------------------------------------------------------------------
   const DeliverySlotAvailability = {
@@ -121717,7 +121747,7 @@ body :where([data-proto='app-icon']) {
       readonly: { type: Boolean, default: false },
     },
 
-    components: { 'price-highlight-tag': PriceHighlightTag },
+    components: { 'price-highlight-tag': PriceHighlightTag, 'slot-discount-chip': ProtoKit.SlotDiscountChip },
 
     setup(props) {
       const slotContext = inject(deliverySlotContextKey, undefined)
@@ -121782,20 +121812,10 @@ body :where([data-proto='app-icon']) {
             class="tw-flex tw-flex-col tw-items-center tw-gap-1"
             data-tid="slot-discount">
             <span class="tw-sr-only">{{ discountSrText }}</span>
-            <span
+            <slot-discount-chip
               aria-hidden="true"
-              class="tw-inline-flex tw-h-6 tw-overflow-hidden tw-rounded-ds-sm">
-              <span class="tw-flex tw-items-center tw-bg-ds-neutral-5 tw-px-1.5 tw-text-ds-primary">
-                <component
-                  :is="discount.reason.icon"
-                  size="xs"
-                  :style="discount.reason.iconStyle"></component>
-              </span>
-              <span
-                class="tw-flex tw-items-center tw-bg-ds-tint-highlight-green tw-px-1.5 tw-text-style-strong tw-text-ds-state-success">
-                {{ reducedPriceText }}
-              </span>
-            </span>
+              :reason="discount.reason"
+              :text="reducedPriceText"></slot-discount-chip>
             <s
               aria-hidden="true"
               class="tw-text-style-sm tw-text-ds-neutral-70">
@@ -123029,6 +123049,7 @@ body :where([data-proto='app-icon']) {
       'relative-delivery-badge': RelativeDeliveryBadge,
       'discount-tile-frame': DiscountTileFrame,
       'plus-status-strip': ProtoKit.PlusStatusStrip,
+      'slot-discount-chip': ProtoKit.SlotDiscountChip,
     },
 
     setup(props, { emit, expose }) {
@@ -123221,20 +123242,10 @@ body :where([data-proto='app-icon']) {
                   class="tw-flex tw-flex-wrap tw-items-center tw-gap-1"
                   data-tid="delivery-tile-discount-price">
                   <span class="tw-sr-only">{{ discountSrText }}</span>
-                  <span
+                  <slot-discount-chip
                     aria-hidden="true"
-                    class="tw-inline-flex tw-h-6 tw-overflow-hidden tw-rounded-ds-sm">
-                    <span class="tw-flex tw-items-center tw-bg-ds-neutral-5 tw-px-1.5 tw-text-ds-primary">
-                      <component
-                        :is="discount.reason.icon"
-                        size="xs"
-                        :style="discount.reason.iconStyle"></component>
-                    </span>
-                    <span
-                      class="tw-flex tw-items-center tw-bg-ds-tint-highlight-green tw-px-1.5 tw-text-style-strong tw-text-ds-state-success">
-                      {{ reducedPriceText }}
-                    </span>
-                  </span>
+                    :reason="discount.reason"
+                    :text="reducedPriceText"></slot-discount-chip>
                   <s
                     aria-hidden="true"
                     class="tw-px-1 tw-text-style-sm tw-text-ds-neutral-70">
@@ -125577,6 +125588,10 @@ body :where([data-proto='credits-tooltip-text']) ul {
       'relative-delivery-badge': RelativeDeliveryBadge,
       'fast-delivery-badge': FastDeliveryBadge,
       'checkout-cashback': CheckoutCashback,
+      // PROTO: defined by the checkout-delivery component (loaded before this one)
+      get 'slot-discount-chip'() {
+        return ProtoKit.SlotDiscountChip
+      },
     },
 
     props: {
@@ -125619,6 +125634,28 @@ body :where([data-proto='credits-tooltip-text']) ul {
         () => props.hasConvenienceFee || !props.cartPrices?.transport,
       )
 
+      // PROTO: a discount on the chosen delivery window — the transport row then shows the
+      // split chip (reason icon + price / "Zdarma") instead of the plain price. The price
+      // is the one already in `cartPrices.transport` / the total; only the presentation
+      // changes. No struck-through price and no savings text in the summary.
+      const transportDiscount = computed(() => {
+        const transport = props.shoppingState?.transport?.value
+        if (!transport || transport.basePrice === undefined || !ProtoKit.slotDiscount) return null
+        const discount = ProtoKit.slotDiscount.apply(transport.basePrice)
+        return discount.reduced ? discount : null
+      })
+      const transportChipText = computed(() => {
+        if (props.cartPrices?.transport) return localizePrice(props.cartPrices.transport)
+        const free = t('general.gratis')
+        return free.charAt(0).toUpperCase() + free.slice(1)
+      })
+      const transportSrText = computed(
+        () =>
+          (props.cartPrices?.transport ? localizePrice(props.cartPrices.transport) : 'zdarma') +
+          ', ' +
+          transportDiscount.value?.reason?.srText,
+      )
+
       const canRenderPackagingFee = computed(
         () =>
           props.packagingFeeEnabled &&
@@ -125631,6 +125668,9 @@ body :where([data-proto='credits-tooltip-text']) ul {
       return {
         weightedProductDepositModal,
         shouldUseTransportPriceHighlight,
+        transportDiscount,
+        transportChipText,
+        transportSrText,
         canRenderPackagingFee,
         t,
         localizePrice,
@@ -125796,8 +125836,16 @@ body :where([data-proto='credits-tooltip-text']) ul {
                 v-if="shoppingState.summary.value.transportTypeLabel === 'fast'"></fast-delivery-badge>
             </span>
             <template #price>
+              <template v-if="transportDiscount">
+                <span class="tw-sr-only">{{ transportSrText }}</span>
+                <slot-discount-chip
+                  aria-hidden="true"
+                  :reason="transportDiscount.reason"
+                  :text="transportChipText"
+                  data-tid="transport-discount-chip"></slot-discount-chip>
+              </template>
               <price-highlight-tag
-                v-if="shouldUseTransportPriceHighlight"
+                v-else-if="shouldUseTransportPriceHighlight"
                 :variant="hasConvenienceFee ? 'light' : 'deep'">
                 <span
                   class="tw-capitalize"
