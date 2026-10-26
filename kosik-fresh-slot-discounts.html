@@ -90,23 +90,24 @@
          A scoped layer on <html data-theme="shopify">; nothing here applies by default.
          Style reference: a Shopify customer-account page (white page, bordered white
          cards with a ~16 px radius and hairline dividers, light-grey icon holders,
-         white buttons with a light border and bold blue text, blue links, bold black
-         headings, outlined grey toggle). Values sampled from the reference screenshot:
-           blue #005CD1 · text #000000 · secondary text #707070 · card border #ECECEC ·
-           button border #DFDFDF · icon holder / badge #F6F6F6 · page #FFFFFF
+         white buttons with a light border, black headings, outlined grey toggle). Values
+         sampled from the reference screenshot:
+           text #000000 · secondary text #707070 · card border #E5E5E5 · button border
+           #DFDFDF · icon holder / badge #F6F6F6 · page #FFFFFF · card shadow 0 2px 12px 8 %
          Rules of the theme:
-           - surfaces, borders, radii, shadows, headings, secondary / ghost buttons and
-             plain links follow the reference;
-           - FILLED primary buttons, semantic / contrast colours (green, red, discount UI,
-             Plus purple) and brand accents (progress bar, tints, icons) keep their
-             production colours;
+           - surfaces, borders, radii, shadows, headings and the white secondary / ghost
+             buttons follow the reference;
+           - all colour comes from the Košík palette: links, secondary / ghost button text
+             and icons, the focus ring and the brand accents use the DS primary purple
+             (var(--ds-context-primary), #651B69); FILLED primary buttons and semantic /
+             contrast colours (green, red, discount UI, Plus purple) keep their production
+             colours;
            - font: unchanged — the production Košík font is already Inter (inlined).
          The Fresh tokens that are CSS variables (button variables) are overridden;
          everything compiled into utility classes (surfaces, shadows, radii, text colours)
          is reached with the selectors below.
          ========================================================================== */
       html[data-theme='shopify'] {
-        --sp-blue: #005cd1;
         --sp-text: #000;
         --sp-muted: #707070;
         --sp-border: #e5e5e5;
@@ -120,13 +121,11 @@
         /* smaller variant for boxes inside carousels / grids (clipped by the 4 px item padding) */
         --sp-shadow-card-sm: 0 0 0 1px var(--sp-border), 0 1px 4px rgb(0 0 0 / 0.08);
 
-        /* Fresh button variables: secondary = white, light border, bold blue text; ghost =
-           blue text. Primary and tertiary (filled) buttons are NOT touched. */
+        /* Fresh button variables: secondary = white with a light border; text colour (purple)
+           stays the kit's. Ghost: hover fill only. Primary and tertiary buttons are NOT touched. */
         --ds-button-secondary-background: #fff;
         --ds-button-secondary-border: var(--sp-border-strong);
-        --ds-button-secondary-text: var(--sp-blue);
         --ds-button-secondary-hover-background: var(--sp-hover);
-        --ds-button-ghost-text: var(--sp-blue);
         --ds-button-ghost-hover-background: var(--sp-hover);
       }
 
@@ -196,14 +195,17 @@
         border-radius: var(--sp-radius-control);
         font-weight: 650;
       }
-      /* plain links: blue */
-      html[data-theme='shopify'] .tw-text-ds-link {
-        color: var(--sp-blue);
+      /* plain links keep the kit's purple (.tw-text-ds-link, a.tw-text-ds-primary): nothing to
+         override. Underlined text buttons ("Zobrazit více", the delivery time link) inherit the
+         page text colour in the kit, so they are set to the primary purple here. */
+      html[data-theme='shopify'] button.tw-underline {
+        color: var(--ds-context-primary);
       }
-      /* focus: a clear blue outline on every focusable element (the kit's rings are
-         purple / green / black per component) */
+      /* focus: a clear purple outline on every focusable element (the kit's rings are
+         purple / green / black per component). The 2 px offset keeps a white gap between the
+         ring and filled purple controls, so the ring stays visible next to them. */
       html[data-theme='shopify'] :focus-visible {
-        outline: 2px solid var(--sp-blue);
+        outline: 2px solid var(--ds-context-primary);
         outline-offset: 2px;
         /* the kit's own Tailwind focus ring is switched off so the two do not stack */
         --tw-ring-offset-shadow: 0 0 #0000;
@@ -283,19 +285,15 @@
         color: var(--sp-text);
         font-weight: 550;
       }
-      html[data-theme='shopify'] a.tw-text-ds-primary {
-        color: var(--sp-blue);
-      }
-      /* outlined brand pills (Filtry, filter chips): follow the secondary-button look */
+      /* outlined brand pills (Filtry, filter chips): light border like the secondary buttons,
+         purple text and icon stay the kit's */
       html[data-theme='shopify'] [data-cid='ds-button'].tw-border-ds-primary {
         border-color: var(--sp-border-strong);
-        color: var(--sp-blue);
-        --ds-icon-fill-primary: var(--sp-blue);
       }
       html[data-theme='shopify'] .button-show-all {
         border: 1px solid var(--sp-border-strong);
         border-radius: var(--sp-radius-control);
-        color: var(--sp-blue);
+        color: var(--ds-context-primary);
         font-weight: 650;
         background-color: #fff;
       }
@@ -307,10 +305,6 @@
         border-color: var(--sp-border);
         border-radius: var(--sp-radius-card);
         box-shadow: var(--sp-shadow-card);
-      }
-      /* underlined text buttons (e.g. delivery time in the info strip) are links too */
-      html[data-theme='shopify'] button.tw-underline {
-        color: var(--sp-blue);
       }
       /* page titles and accordion cards (product detail) */
       html[data-theme='shopify'] h1 {
@@ -412,6 +406,19 @@
       /* focus rings in the menu are drawn inside the (clipped, full-width) rows */
       html[data-theme='shopify'] .mobile-header__sidebar :focus-visible {
         outline-offset: -3px;
+      }
+
+      /* tip chips on the cash desk ("Dýško" values): same hairline ring + soft shadow as the
+         cards. The chips are small rectangles (34 px high), so they take the control radius
+         (12 px, like the buttons) rather than the 16 px card radius, which would turn them
+         into pills. The smaller shadow variant is used because the chips sit 8 px apart. */
+      html[data-theme='shopify'] button[data-tid^='cashdesk-tip-'] {
+        border-radius: var(--sp-radius-control);
+        box-shadow: var(--sp-shadow-card-sm);
+      }
+      /* selected chip (dark fill): no light ring around the dark shape, only the soft shadow */
+      html[data-theme='shopify'] button[data-tid^='cashdesk-tip-'][class*='!tw-bg-ds-complementary'] {
+        box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
       }
     </style>
     <!-- PROTO:EDIT-END head -->
