@@ -57,6 +57,227 @@
         }
       }
     </style>
+    <style id="theme-shopify">
+      /* ==========================================================================
+         PROTOTYPE ONLY — alternative visual theme "styl Shopify" (?theme=shopify)
+         A scoped layer on <html data-theme="shopify">; nothing here applies by default.
+         Style reference: a Shopify customer-account page (white page, bordered white
+         cards with a ~16 px radius and hairline dividers, light-grey icon holders,
+         white buttons with a light border and bold blue text, blue links, bold black
+         headings, outlined grey toggle). Values sampled from the reference screenshot:
+           blue #005CD1 · text #000000 · secondary text #707070 · card border #ECECEC ·
+           button border #DFDFDF · icon holder / badge #F6F6F6 · page #FFFFFF
+         Font: unchanged — the production Košík font is already Inter (see the
+         inlined inter.css), which is the family of the reference.
+         The Fresh tokens that are CSS variables are overridden (DS context + button
+         variables); everything compiled into utility classes (surfaces, shadows, radii,
+         text colours) is reached with the selectors below.
+         ========================================================================== */
+      html[data-theme='shopify'] {
+        --sp-blue: #005cd1;
+        --sp-blue-hover: #004aa8;
+        --sp-blue-tint: #eef4fc;
+        --sp-text: #000;
+        --sp-muted: #707070;
+        --sp-border: #ececec;
+        --sp-border-strong: #dfdfdf;
+        --sp-holder: #f6f6f6;
+        --sp-radius-card: 16px;
+        --sp-radius-control: 12px;
+        --sp-shadow-card: 0 0 0 1px var(--sp-border), 0 1px 3px rgb(0 0 0 / 0.04);
+
+        /* Fresh theme context: primary buttons, focus rings, tabs */
+        --ds-context-primary: var(--sp-blue);
+        --ds-context-off-mid: var(--sp-blue-hover);
+        --ds-context-mid: #99bde9;
+        --ds-context-tertiary: var(--sp-blue-tint);
+        --ds-context-off-light: #dbe7f7;
+        /* Fresh button variables */
+        --ds-button-secondary-background: #fff;
+        --ds-button-secondary-border: var(--sp-border-strong);
+        --ds-button-secondary-text: var(--sp-blue);
+        --ds-button-secondary-hover-background: var(--sp-holder);
+        --ds-button-tertiary-background: var(--sp-holder);
+        --ds-button-tertiary-text: var(--sp-blue);
+        --ds-button-tertiary-hover-background: #ececec;
+        --ds-button-ghost-text: var(--sp-blue);
+        --ds-button-ghost-hover-background: var(--sp-holder);
+        /* Fresh icon fills (two-tone icons): blue instead of purple ... */
+        --ds-icon-fill-primary: var(--sp-blue);
+        --ds-icon-fill-secondary: #99bde9;
+      }
+      /* ... except in the discount UI, which keeps the Košík Plus purple */
+      html[data-theme='shopify'] :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) {
+        --ds-icon-fill-primary: #651b69;
+        --ds-icon-fill-secondary: #c49edb;
+      }
+      html[data-theme='shopify'] .tw-text-ds-icon-additional {
+        color: #99bde9;
+      }
+
+      /* page */
+      html[data-theme='shopify'] body,
+      html[data-theme='shopify'] .checkout-custom {
+        background-color: #fff;
+      }
+      html[data-theme='shopify'] .tw-text-ds-title {
+        color: var(--sp-text);
+      }
+      html[data-theme='shopify'] .tw-text-ds-paragraph-alternative,
+      html[data-theme='shopify'] .tw-text-ds-subtitle {
+        color: var(--sp-muted);
+      }
+      /* section headings: bold black, larger */
+      html[data-theme='shopify'] section > .tw-text-style-lg-strong.tw-text-ds-title {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        font-weight: 650;
+      }
+
+      /* cards: white, hairline border, large radius, almost no shadow */
+      html[data-theme='shopify'] .tw-shadow-sm {
+        box-shadow: var(--sp-shadow-card);
+      }
+      html[data-theme='shopify'] .tw-shadow-sm.tw-rounded-ds-lg,
+      html[data-theme='shopify'] .tw-shadow-sm.tw-rounded-ds-xl,
+      html[data-theme='shopify'] [data-cid='ds-ribbon'],
+      html[data-theme='shopify'] [data-cid='ds-tile'] {
+        border-radius: var(--sp-radius-card);
+      }
+      html[data-theme='shopify'] [data-cid='ds-tile'] {
+        box-shadow: var(--sp-shadow-card);
+      }
+      /* a tile inside a tile extension: the card is the extension, the tile is its top part */
+      html[data-theme='shopify'] [data-cid='ds-tile-extension'] {
+        border-radius: var(--sp-radius-card);
+      }
+      html[data-theme='shopify'] [data-cid='ds-tile-extension-tile'] [data-cid='ds-tile'] {
+        border-radius: var(--sp-radius-card) var(--sp-radius-card) 0 0;
+        box-shadow: none;
+      }
+      html[data-theme='shopify'] [data-cid='ds-tile-extension-tile'] {
+        border-bottom-color: var(--sp-border);
+      }
+      /* required tile: keep a clear outline (black as in production), not a hairline */
+      /* icon holder in tiles: light-grey rounded square, black line icons */
+      html[data-theme='shopify'] [data-cid='ds-tile-icon'] {
+        background-color: var(--sp-holder);
+        border-radius: var(--sp-radius-control);
+        --ds-icon-fill-primary: #000;
+        --ds-icon-fill-secondary: #000;
+        color: #000;
+      }
+      html[data-theme='shopify'] [data-cid='ds-tile-icon'] svg.tw-text-ds-primary {
+        color: #000;
+      }
+      /* the order-progress milestones carry their colours as inline custom properties */
+      html[data-theme='shopify'] .proto-opb-dot {
+        --opb-dot-primary: var(--sp-blue) !important;
+        --opb-dot-bg: var(--sp-blue-tint) !important;
+      }
+      html[data-theme='shopify'] .proto-opb-dot circle[fill='#F4E4FF'] {
+        fill: var(--sp-blue-tint);
+      }
+
+      /* switches: outlined white track + grey knob when off, blue when on */
+      html[data-theme='shopify'] [data-cid='ds-switch'] {
+        box-shadow: none;
+      }
+      html[data-theme='shopify'] [data-cid='ds-switch'][data-state='unchecked'] {
+        background-color: #fff;
+        border-color: var(--sp-muted);
+        color: var(--sp-muted);
+      }
+      html[data-theme='shopify'] [data-cid='ds-switch'][data-state='unchecked'] > span {
+        background-color: var(--sp-muted);
+        box-shadow: none;
+      }
+      html[data-theme='shopify'] [data-cid='ds-switch'][data-state='checked'] {
+        color: var(--sp-blue);
+        border-color: var(--sp-blue);
+      }
+
+      /* buttons: 12 px radius, bold */
+      html[data-theme='shopify'] [data-cid='ds-button'] {
+        border-radius: var(--sp-radius-control);
+        font-weight: 650;
+      }
+      /* primary buttons: the reference shows no filled primary, so blue (#005CD1, white text
+         = 6.1:1). The cash-desk CTA is the neutral-90 utility, the basket CTA the green one;
+         both follow the theme's blue */
+      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-contrast-green,
+      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-neutral-90 {
+        background-color: var(--sp-blue);
+      }
+      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-contrast-green:hover,
+      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-neutral-90:hover {
+        background-color: var(--sp-blue-hover);
+      }
+      /* the chip's price text: #198754 on #E5F9EE is only 4.1:1 (fails AA, also in the default
+         theme); the theme uses the DS "contrast green dark" #136941 (6.1:1) there */
+      html[data-theme='shopify'] [data-tid='slot-discount-chip'] .tw-text-ds-state-success {
+        color: #136941;
+      }
+      /* links: blue */
+      html[data-theme='shopify'] .tw-text-ds-link {
+        color: var(--sp-blue);
+      }
+      /* focus: a clear blue outline on every focusable element (the kit's rings are
+         purple / green / black per component) */
+      html[data-theme='shopify'] :focus-visible {
+        outline: 2px solid var(--sp-blue);
+        outline-offset: 2px;
+      }
+      /* inside clipped containers (tile extension, basket card) the ring is drawn inside */
+      html[data-theme='shopify'] [data-cid='ds-tile-extension'] :focus-visible,
+      html[data-theme='shopify'] .checkout-custom .product-group__content :focus-visible {
+        outline-offset: -3px;
+      }
+
+      /* Košík purple -> blue for generic UI (progress bar, tile labels, "Prioritní" block ...).
+         The discount UI keeps its semantic purple: Plus strip / status, −X % strip, reason
+         chips (excluded below) */
+      html[data-theme='shopify'] .tw-bg-ds-primary:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
+        background-color: var(--sp-blue);
+      }
+      html[data-theme='shopify'] .tw-bg-ds-primary-light:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
+        background-color: var(--sp-blue-tint);
+      }
+      html[data-theme='shopify'] .tw-bg-ds-primary-off-light:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
+        background-color: #dbe7f7;
+      }
+      html[data-theme='shopify'] .tw-text-ds-primary:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *),
+      html[data-theme='shopify'] .tw-text-ds-primary-off-dark:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
+        color: var(--sp-blue);
+      }
+      /* basket: each product group is one bordered card, rows divided by hairlines */
+      html[data-theme='shopify'] .checkout-custom .product-group__content {
+        background: #fff;
+        border: 1px solid var(--sp-border);
+        border-radius: var(--sp-radius-card);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+        overflow: hidden;
+      }
+      html[data-theme='shopify'] .checkout-custom .product-group__content > * + * {
+        margin-top: 0;
+        border-top: 1px solid var(--sp-border);
+      }
+      html[data-theme='shopify'] .product-row {
+        border-radius: 0;
+      }
+      html[data-theme='shopify'] .checkout-custom .product-group__title {
+        color: var(--sp-text);
+        font-weight: 650;
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+      }
+
+      /* form fields */
+      html[data-theme='shopify'] [data-cid='ds-text-field'] {
+        border-radius: var(--sp-radius-control);
+        border-color: var(--sp-border-strong);
+      }
+    </style>
     <!-- PROTO:EDIT-END head -->
 
     <!-- inlined:../vendor/inter.css — generated vendor code, do not read or edit -->
@@ -121024,6 +121245,12 @@ body :where([data-proto='app-icon']) {
         new URLSearchParams(window.location.search).get('variant')?.toLowerCase() === 'b'
           ? 'b'
           : 'a',
+      /** PROTO visual theme: 'kosik' (default) | 'shopify' (?theme=shopify) — a scoped CSS
+       *  layer on <html data-theme>, see the "theme-shopify" style block in the head */
+      theme:
+        new URLSearchParams(window.location.search).get('theme')?.toLowerCase() === 'shopify'
+          ? 'shopify'
+          : 'kosik',
       /** Košík Plus package state shown in the strip (unconfirmed demo values) */
       plus: { daysLeft: 17, packageDays: 33 },
       reasons: SLOT_DISCOUNT_REASONS,
@@ -135250,64 +135477,6 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
         role="status"
         aria-live="polite">{{ slotAnnouncement }}</div>
 
-      <!-- PROTO ONLY — NOT PART OF THE DESIGN: switch of the discount reason, to demo
-           the three reasons (+ none) of the Figma. -->
-      <div
-        class="tw-pointer-events-auto tw-fixed tw-left-3 tw-bottom-[150px] tw-z-[100000] min-[992px]:tw-bottom-4"
-        data-proto="reason-switch">
-        <div
-          v-if="switchOpen"
-          class="tw-mb-2 tw-w-64 tw-rounded-ds-xl tw-bg-ds-neutral-90 tw-p-3 tw-text-ds-neutral-0 tw-shadow-lg"
-          role="radiogroup"
-          aria-label="Důvod slevy na dopravu">
-          <p class="tw-mb-2 tw-text-style-sm-strong">Pouze prototyp, není součástí návrhu.</p>
-          <p class="tw-mb-2 tw-text-style-sm">Důvod slevy na dopravu:</p>
-          <button
-            v-for="option in switchOptions"
-            :key="option.id"
-            type="button"
-            role="radio"
-            :aria-checked="discountState.reason === option.id"
-            class="tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
-            :class="
-              discountState.reason === option.id
-                ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger'
-                : 'tw-text-ds-neutral-0'
-            "
-            @click="discountState.reason = option.id">
-            {{ option.label }}
-          </button>
-          <div
-            class="tw-mt-3 tw-border-t tw-border-ds-neutral-70 tw-pt-3"
-            role="radiogroup"
-            aria-label="Varianta dlaždice času doručení">
-            <p class="tw-mb-2 tw-text-style-sm">Varianta dlaždice (URL: ?variant=b):</p>
-            <button
-              v-for="option in variantOptions"
-              :key="option.id"
-              type="button"
-              role="radio"
-              :aria-checked="discountState.variant === option.id"
-              class="tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
-              :class="
-                discountState.variant === option.id
-                  ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger'
-                  : 'tw-text-ds-neutral-0'
-              "
-              @click="discountState.variant = option.id">
-              {{ option.label }}
-            </button>
-          </div>
-        </div>
-        <button
-          type="button"
-          class="tw-flex tw-h-10 tw-items-center tw-rounded-full tw-bg-ds-neutral-90 tw-px-4 tw-text-style-sm-strong tw-text-ds-neutral-0 tw-shadow-lg"
-          :aria-expanded="switchOpen"
-          @click="switchOpen = !switchOpen">
-          Prototyp: {{ switchLabel }} · {{ discountState.variant.toUpperCase() }}
-        </button>
-      </div>
-
       <!-- AppMainWithConfig.vue mounts the DS toaster beside the app shell on every
            route; it teleports its viewport <ol> to the end of <body> and is where any
            toast the page emits renders. TOAST_TIMEOUT.default is 6000. -->
@@ -137805,32 +137974,6 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
           // and reveals the discount strip; here the tile is brought into view and the
           // result is announced to assistive technology (a polite live region).
           const slotAnnouncement = ref('')
-          const switchOpen = ref(false)
-          const switchOptions = [
-            { id: 'plus', label: 'Košík Plus (koruna)' },
-            { id: 'benjaminek', label: 'Klub Benjamínek (medvěd)' },
-            { id: 'voucher', label: 'Voucher na dopravu zdarma' },
-            { id: 'none', label: 'Bez slevy' },
-          ]
-          const variantOptions = [
-            { id: 'a', label: 'A: Plus nad dlaždicí' },
-            { id: 'b', label: 'B: Plus uvnitř dlaždice' },
-          ]
-          // keep ?variant=b in the address bar (shareable), the hash route is untouched
-          Vue.watch(
-            () => ProtoKit.slotDiscount.variant,
-            (variant) => {
-              const url = new URL(window.location.href)
-              if (variant === 'b') url.searchParams.set('variant', 'b')
-              else url.searchParams.delete('variant')
-              window.history.replaceState(window.history.state, '', url)
-            },
-          )
-          const switchLabel = computed(
-            () =>
-              switchOptions.find((option) => option.id === ProtoKit.slotDiscount.reason)?.label ??
-              '',
-          )
           async function onSlotSelected() {
             await Vue.nextTick() // the tile re-renders with the chosen window first
             const transport = shoppingState.transport.value
@@ -138121,10 +138264,6 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
             selectTimeslot,
             onSlotSelected,
             slotAnnouncement,
-            switchOpen,
-            switchOptions,
-            variantOptions,
-            switchLabel,
             discountState: ProtoKit.slotDiscount,
             setEarlyDelivery,
             setDeliveryNote,
@@ -138222,6 +138361,128 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
         },
       }
 
+      // ─── PROTOTYPE ONLY — the dark switch chip (reason / tile variant / theme) ───────────
+      // Lives in the app root so it is available on every page; the reason and the tile
+      // variant only matter on the cash desk, the theme ("Vzhled") on all pages.
+      const ProtoSwitch = {
+        setup() {
+          const route = KosikUI.vueRouter.useRoute()
+          const state = ProtoKit.slotDiscount
+          const open = ref(false)
+          const onCashdesk = computed(() => route.path === '/cashdesk')
+          const reasonOptions = [
+            { id: 'plus', label: 'Košík Plus (koruna)' },
+            { id: 'benjaminek', label: 'Klub Benjamínek (medvěd)' },
+            { id: 'voucher', label: 'Voucher na dopravu zdarma' },
+            { id: 'none', label: 'Bez slevy' },
+          ]
+          const variantOptions = [
+            { id: 'a', label: 'A: Plus nad dlaždicí' },
+            { id: 'b', label: 'B: Plus uvnitř dlaždice' },
+          ]
+          const themeOptions = [
+            { id: 'kosik', label: 'Košík (výchozí)' },
+            { id: 'shopify', label: 'Alternativa: styl Shopify' },
+          ]
+          const label = computed(() => {
+            const theme = state.theme === 'shopify' ? 'Shopify' : 'Košík'
+            if (!onCashdesk.value) return 'Prototyp: ' + theme
+            const reason = reasonOptions.find((option) => option.id === state.reason)?.label ?? ''
+            return 'Prototyp: ' + reason + ' · ' + state.variant.toUpperCase() + ' · ' + theme
+          })
+
+          // the theme is a root attribute, so teleported drawers / popovers get it too
+          Vue.watch(
+            () => state.theme,
+            (theme) => document.documentElement.setAttribute('data-theme', theme),
+            { immediate: true },
+          )
+          // keep ?variant=b / ?theme=shopify in the address bar (shareable); hash untouched
+          Vue.watch(
+            () => [state.variant, state.theme],
+            ([variant, theme]) => {
+              const url = new URL(window.location.href)
+              if (variant === 'b') url.searchParams.set('variant', 'b')
+              else url.searchParams.delete('variant')
+              if (theme === 'shopify') url.searchParams.set('theme', 'shopify')
+              else url.searchParams.delete('theme')
+              window.history.replaceState(window.history.state, '', url)
+            },
+          )
+          return { state, open, onCashdesk, reasonOptions, variantOptions, themeOptions, label }
+        },
+        template: `
+          <div
+            class="proto-switch tw-pointer-events-auto tw-fixed tw-left-3 tw-bottom-[150px] tw-z-[100000] min-[992px]:tw-bottom-4"
+            data-proto="reason-switch">
+            <div
+              v-if="open"
+              class="tw-mb-2 tw-max-h-[calc(100vh-14rem)] tw-w-64 tw-overflow-y-auto tw-rounded-ds-xl tw-bg-ds-neutral-90 tw-p-3 tw-text-ds-neutral-0 tw-shadow-lg">
+              <p class="tw-mb-2 tw-text-style-sm-strong">Pouze prototyp, není součástí návrhu.</p>
+              <template v-if="onCashdesk">
+                <div
+                  role="radiogroup"
+                  aria-label="Důvod slevy na dopravu">
+                  <p class="tw-mb-2 tw-text-style-sm">Důvod slevy na dopravu:</p>
+                  <button
+                    v-for="option in reasonOptions"
+                    :key="option.id"
+                    type="button"
+                    role="radio"
+                    :aria-checked="state.reason === option.id"
+                    class="proto-switch__option tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
+                    :class="state.reason === option.id ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger' : 'tw-text-ds-neutral-0'"
+                    @click="state.reason = option.id">
+                    {{ option.label }}
+                  </button>
+                </div>
+                <div
+                  class="tw-mt-3 tw-border-t tw-border-ds-neutral-70 tw-pt-3"
+                  role="radiogroup"
+                  aria-label="Varianta dlaždice času doručení">
+                  <p class="tw-mb-2 tw-text-style-sm">Varianta dlaždice (URL: ?variant=b):</p>
+                  <button
+                    v-for="option in variantOptions"
+                    :key="option.id"
+                    type="button"
+                    role="radio"
+                    :aria-checked="state.variant === option.id"
+                    class="proto-switch__option tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
+                    :class="state.variant === option.id ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger' : 'tw-text-ds-neutral-0'"
+                    @click="state.variant = option.id">
+                    {{ option.label }}
+                  </button>
+                </div>
+              </template>
+              <div
+                :class="{ 'tw-mt-3 tw-border-t tw-border-ds-neutral-70 tw-pt-3': onCashdesk }"
+                role="radiogroup"
+                aria-label="Vzhled">
+                <p class="tw-mb-2 tw-text-style-sm">Vzhled (URL: ?theme=shopify):</p>
+                <button
+                  v-for="option in themeOptions"
+                  :key="option.id"
+                  type="button"
+                  role="radio"
+                  :aria-checked="state.theme === option.id"
+                  class="proto-switch__option tw-flex tw-min-h-10 tw-w-full tw-items-center tw-rounded-ds-lg tw-px-3 tw-py-2 tw-text-left tw-text-style-text"
+                  :class="state.theme === option.id ? 'tw-bg-ds-neutral-0 tw-text-ds-neutral-90 tw-font-ds-stronger' : 'tw-text-ds-neutral-0'"
+                  @click="state.theme = option.id">
+                  {{ option.label }}
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="proto-switch__toggle tw-flex tw-h-10 tw-items-center tw-rounded-full tw-bg-ds-neutral-90 tw-px-4 tw-text-style-sm-strong tw-text-ds-neutral-0 tw-shadow-lg"
+              :aria-expanded="open"
+              @click="open = !open">
+              {{ label }}
+            </button>
+          </div>
+        `,
+      }
+
       // KspAdminModal — production mounts one instance in GlobalModals.vue. The SPA
       // does the same: the per-page mounts are stripped from the sliced templates
       // (kept-alive pages would each react to the hash and stack modals) and the
@@ -138236,10 +138497,12 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
           '<router-view v-slot="{ Component }">' +
           '<keep-alive><component :is="Component"></component></keep-alive>' +
           '</router-view>' +
-          '<ksp-admin-modal v-model:slug="kspSlug"></ksp-admin-modal>',
+          '<ksp-admin-modal v-model:slug="kspSlug"></ksp-admin-modal>' +
+          '<proto-switch></proto-switch>',
       })
 
       KosikUI.install(app)
+      app.component('ProtoSwitch', ProtoSwitch)
 
       // register all ProtoKit components (PascalCase resolves kebab-case tags automatically)
       for (const [name, value] of Object.entries(ProtoKit)) {
