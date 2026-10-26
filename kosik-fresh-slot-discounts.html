@@ -61,18 +61,27 @@
       /* ==========================================================================
          PROTOTYPE-ONLY CONTRAST FIX — production differs.
          Green text on a green tint (#198754 on #F2FEF6 is 4.38:1, on #D6EAD1 is 3.57:1) is
-         below AA 4.5:1. Here it uses the existing DS token colors.ds.contrast.green.dark
-         (#136941), the same one as the discount chip: 6.49:1 and 5.30:1. It is one central
-         rule for the shared components (PriceHighlightTag, the kit tag, the order progress
-         bar success state), active in BOTH themes. Green that is not text on a tint
-         (white on a green button, text on white) is not touched.
+         below AA 4.5:1. Here it uses --proto-contrast-green, which is exactly the DS token
+         colors.ds.contrast.green.dark (#136941): 6.49:1 on #F2FEF6 and 5.30:1 on #D6EAD1.
+         Defined once here; active in BOTH themes. Green that is not text on a tint (white on
+         a green button, text on white) is not touched.
+
+         Where it is used (all of it is in the one rule below):
+           - PriceHighlightTag, the shared tint price tag (drawer "zdarma" cells, cart rows)
+           - the kit tag "green" and "pastel-green" variants (header "Ušetříte 24,50 Kč")
+           - the order progress bar success state (texts and icons on the feedback tint)
+         Not in this rule: the discount chip (ProtoKit.SlotDiscountChip) takes the same colour
+         from the DS utility class tw-text-ds-contrast-green-dark in its own template.
          ========================================================================== */
+      :root {
+        --proto-contrast-green: #136941;
+      }
       .tw-bg-ds-tint-highlight-green.tw-text-ds-state-success,
       .tw-bg-ds-tint-highlight-green.tw-text-ds-contrast-green,
       .tw-bg-ds-tint-highlight-green .tw-text-ds-state-success,
       .tw-bg-ds-feedback .tw-text-ds-state-success,
       .tw-bg-ds-feedback .tw-text-ds-contrast-green {
-        color: #136941;
+        color: var(--proto-contrast-green);
       }
     </style>
     <style id="theme-shopify">
@@ -387,6 +396,18 @@
           background-color: var(--sp-hover);
           color: inherit;
         }
+      }
+      /* "Speciální nabídka" title and its items: the leading icon starts at the same 16 px gutter
+         as the L1 / L2 titles (production: 12 px title icon, 10 px item icons). Icon-to-text
+         spacing is unchanged (title icon 18 px + 11 px; item text 25 px right of the icon). */
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu__title {
+        padding-left: 16px;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu-item {
+        padding-left: 41px;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu-icon {
+        left: 16px;
       }
       /* focus rings in the menu are drawn inside the (clipped, full-width) rows */
       html[data-theme='shopify'] .mobile-header__sidebar :focus-visible {
