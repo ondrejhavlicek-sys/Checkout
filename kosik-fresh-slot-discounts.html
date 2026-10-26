@@ -67,16 +67,19 @@
          headings, outlined grey toggle). Values sampled from the reference screenshot:
            blue #005CD1 · text #000000 · secondary text #707070 · card border #ECECEC ·
            button border #DFDFDF · icon holder / badge #F6F6F6 · page #FFFFFF
-         Font: unchanged — the production Košík font is already Inter (see the
-         inlined inter.css), which is the family of the reference.
-         The Fresh tokens that are CSS variables are overridden (DS context + button
-         variables); everything compiled into utility classes (surfaces, shadows, radii,
-         text colours) is reached with the selectors below.
+         Rules of the theme:
+           - surfaces, borders, radii, shadows, headings, secondary / ghost buttons and
+             plain links follow the reference;
+           - FILLED primary buttons, semantic / contrast colours (green, red, discount UI,
+             Plus purple) and brand accents (progress bar, tints, icons) keep their
+             production colours;
+           - font: unchanged — the production Košík font is already Inter (inlined).
+         The Fresh tokens that are CSS variables (button variables) are overridden;
+         everything compiled into utility classes (surfaces, shadows, radii, text colours)
+         is reached with the selectors below.
          ========================================================================== */
       html[data-theme='shopify'] {
         --sp-blue: #005cd1;
-        --sp-blue-hover: #004aa8;
-        --sp-blue-tint: #eef4fc;
         --sp-text: #000;
         --sp-muted: #707070;
         --sp-border: #ececec;
@@ -86,33 +89,14 @@
         --sp-radius-control: 12px;
         --sp-shadow-card: 0 0 0 1px var(--sp-border), 0 1px 3px rgb(0 0 0 / 0.04);
 
-        /* Fresh theme context: primary buttons, focus rings, tabs */
-        --ds-context-primary: var(--sp-blue);
-        --ds-context-off-mid: var(--sp-blue-hover);
-        --ds-context-mid: #99bde9;
-        --ds-context-tertiary: var(--sp-blue-tint);
-        --ds-context-off-light: #dbe7f7;
-        /* Fresh button variables */
+        /* Fresh button variables: secondary = white, light border, bold blue text; ghost =
+           blue text. Primary and tertiary (filled) buttons are NOT touched. */
         --ds-button-secondary-background: #fff;
         --ds-button-secondary-border: var(--sp-border-strong);
         --ds-button-secondary-text: var(--sp-blue);
         --ds-button-secondary-hover-background: var(--sp-holder);
-        --ds-button-tertiary-background: var(--sp-holder);
-        --ds-button-tertiary-text: var(--sp-blue);
-        --ds-button-tertiary-hover-background: #ececec;
         --ds-button-ghost-text: var(--sp-blue);
         --ds-button-ghost-hover-background: var(--sp-holder);
-        /* Fresh icon fills (two-tone icons): blue instead of purple ... */
-        --ds-icon-fill-primary: var(--sp-blue);
-        --ds-icon-fill-secondary: #99bde9;
-      }
-      /* ... except in the discount UI, which keeps the Košík Plus purple */
-      html[data-theme='shopify'] :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) {
-        --ds-icon-fill-primary: #651b69;
-        --ds-icon-fill-secondary: #c49edb;
-      }
-      html[data-theme='shopify'] .tw-text-ds-icon-additional {
-        color: #99bde9;
       }
 
       /* page */
@@ -120,11 +104,12 @@
       html[data-theme='shopify'] .checkout-custom {
         background-color: #fff;
       }
-      html[data-theme='shopify'] .tw-text-ds-title {
+      /* (the discount UI of the prototype is excluded: its text colours stay as they are) */
+      html[data-theme='shopify'] .tw-text-ds-title:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
         color: var(--sp-text);
       }
-      html[data-theme='shopify'] .tw-text-ds-paragraph-alternative,
-      html[data-theme='shopify'] .tw-text-ds-subtitle {
+      html[data-theme='shopify'] .tw-text-ds-paragraph-alternative:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *),
+      html[data-theme='shopify'] .tw-text-ds-subtitle:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
         color: var(--sp-muted);
       }
       /* section headings: bold black, larger */
@@ -158,7 +143,6 @@
       html[data-theme='shopify'] [data-cid='ds-tile-extension-tile'] {
         border-bottom-color: var(--sp-border);
       }
-      /* required tile: keep a clear outline (black as in production), not a hairline */
       /* icon holder in tiles: light-grey rounded square, black line icons */
       html[data-theme='shopify'] [data-cid='ds-tile-icon'] {
         background-color: var(--sp-holder);
@@ -170,16 +154,8 @@
       html[data-theme='shopify'] [data-cid='ds-tile-icon'] svg.tw-text-ds-primary {
         color: #000;
       }
-      /* the order-progress milestones carry their colours as inline custom properties */
-      html[data-theme='shopify'] .proto-opb-dot {
-        --opb-dot-primary: var(--sp-blue) !important;
-        --opb-dot-bg: var(--sp-blue-tint) !important;
-      }
-      html[data-theme='shopify'] .proto-opb-dot circle[fill='#F4E4FF'] {
-        fill: var(--sp-blue-tint);
-      }
 
-      /* switches: outlined white track + grey knob when off, blue when on */
+      /* switches: outlined white track + grey knob when off (on-state keeps production colour) */
       html[data-theme='shopify'] [data-cid='ds-switch'] {
         box-shadow: none;
       }
@@ -192,33 +168,13 @@
         background-color: var(--sp-muted);
         box-shadow: none;
       }
-      html[data-theme='shopify'] [data-cid='ds-switch'][data-state='checked'] {
-        color: var(--sp-blue);
-        border-color: var(--sp-blue);
-      }
 
-      /* buttons: 12 px radius, bold */
+      /* buttons: 12 px radius, bold (colours of filled buttons untouched) */
       html[data-theme='shopify'] [data-cid='ds-button'] {
         border-radius: var(--sp-radius-control);
         font-weight: 650;
       }
-      /* primary buttons: the reference shows no filled primary, so blue (#005CD1, white text
-         = 6.1:1). The cash-desk CTA is the neutral-90 utility, the basket CTA the green one;
-         both follow the theme's blue */
-      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-contrast-green,
-      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-neutral-90 {
-        background-color: var(--sp-blue);
-      }
-      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-contrast-green:hover,
-      html[data-theme='shopify'] [data-cid='ds-button'].tw-bg-ds-neutral-90:hover {
-        background-color: var(--sp-blue-hover);
-      }
-      /* the chip's price text: #198754 on #E5F9EE is only 4.1:1 (fails AA, also in the default
-         theme); the theme uses the DS "contrast green dark" #136941 (6.1:1) there */
-      html[data-theme='shopify'] [data-tid='slot-discount-chip'] .tw-text-ds-state-success {
-        color: #136941;
-      }
-      /* links: blue */
+      /* plain links: blue */
       html[data-theme='shopify'] .tw-text-ds-link {
         color: var(--sp-blue);
       }
@@ -227,6 +183,9 @@
       html[data-theme='shopify'] :focus-visible {
         outline: 2px solid var(--sp-blue);
         outline-offset: 2px;
+        /* the kit's own Tailwind focus ring is switched off so the two do not stack */
+        --tw-ring-offset-shadow: 0 0 #0000;
+        --tw-ring-shadow: 0 0 #0000;
       }
       /* inside clipped containers (tile extension, basket card) the ring is drawn inside */
       html[data-theme='shopify'] [data-cid='ds-tile-extension'] :focus-visible,
@@ -234,22 +193,6 @@
         outline-offset: -3px;
       }
 
-      /* Košík purple -> blue for generic UI (progress bar, tile labels, "Prioritní" block ...).
-         The discount UI keeps its semantic purple: Plus strip / status, −X % strip, reason
-         chips (excluded below) */
-      html[data-theme='shopify'] .tw-bg-ds-primary:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
-        background-color: var(--sp-blue);
-      }
-      html[data-theme='shopify'] .tw-bg-ds-primary-light:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
-        background-color: var(--sp-blue-tint);
-      }
-      html[data-theme='shopify'] .tw-bg-ds-primary-off-light:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
-        background-color: #dbe7f7;
-      }
-      html[data-theme='shopify'] .tw-text-ds-primary:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *),
-      html[data-theme='shopify'] .tw-text-ds-primary-off-dark:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
-        color: var(--sp-blue);
-      }
       /* basket: each product group is one bordered card, rows divided by hairlines */
       html[data-theme='shopify'] .checkout-custom .product-group__content {
         background: #fff;
@@ -276,6 +219,87 @@
       html[data-theme='shopify'] [data-cid='ds-text-field'] {
         border-radius: var(--sp-radius-control);
         border-color: var(--sp-border-strong);
+      }
+
+      /* ---- kit pages (home, categories, product detail, header, footer) ---- */
+      /* header: white with a hairline instead of the grey bar */
+      html[data-theme='shopify'] .app-header,
+      html[data-theme='shopify'] .cart-preview.ssr-hide-mobile {
+        background-color: #fff;
+      }
+      html[data-theme='shopify'] .app-header {
+        border-bottom: 1px solid var(--sp-border);
+      }
+      /* footer: light grey panel with a hairline on top */
+      html[data-theme='shopify'] .footer {
+        background-color: var(--sp-holder);
+        border-top: 1px solid var(--sp-border);
+      }
+      /* cards: category tiles, product boxes, banners, info / carousel panels, blog boxes */
+      html[data-theme='shopify'] .tw-bg-ds-level-1.tw-rounded-ds-xl {
+        background-color: #fff;
+        border-radius: var(--sp-radius-card);
+        box-shadow: var(--sp-shadow-card);
+      }
+      html[data-theme='shopify'] article.product {
+        border-radius: var(--sp-radius-card);
+        box-shadow: var(--sp-shadow-card);
+      }
+      html[data-theme='shopify'] a.tw-rounded-ds-xl,
+      html[data-theme='shopify'] section.tw-bg-ds-discount,
+      html[data-theme='shopify'] [data-cid='carousel'].tw-bg-ds-secondary,
+      html[data-theme='shopify'] .recent-blog-posts__box {
+        border-radius: var(--sp-radius-card);
+      }
+      html[data-theme='shopify'] .recent-blog-posts__box {
+        box-shadow: var(--sp-shadow-card);
+        overflow: hidden;
+      }
+      /* section headings and text links */
+      html[data-theme='shopify'] .title-section .title,
+      html[data-theme='shopify'] .title-section h2 {
+        color: var(--sp-text);
+        font-weight: 650;
+      }
+      html[data-theme='shopify'] a.tw-text-ds-primary {
+        color: var(--sp-blue);
+      }
+      /* outlined brand pills (Filtry, filter chips): follow the secondary-button look */
+      html[data-theme='shopify'] [data-cid='ds-button'].tw-border-ds-primary {
+        border-color: var(--sp-border-strong);
+        color: var(--sp-blue);
+        --ds-icon-fill-primary: var(--sp-blue);
+      }
+      html[data-theme='shopify'] .button-show-all {
+        border: 1px solid var(--sp-border-strong);
+        border-radius: var(--sp-radius-control);
+        color: var(--sp-blue);
+        font-weight: 650;
+        background-color: #fff;
+      }
+      html[data-theme='shopify'] .tw-bg-ds-discount.tw-rounded-ds-lg {
+        border-radius: var(--sp-radius-card);
+      }
+      /* product detail: the buy box is a standard card */
+      html[data-theme='shopify'] .tw-rounded-xl.tw-border.tw-border-ds-neutral-10 {
+        border-color: var(--sp-border);
+        border-radius: var(--sp-radius-card);
+        box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+      }
+      /* underlined text buttons (e.g. delivery time in the info strip) are links too */
+      html[data-theme='shopify'] button.tw-underline {
+        color: var(--sp-blue);
+      }
+      /* page titles and accordion cards (product detail) */
+      html[data-theme='shopify'] h1 {
+        color: var(--sp-text);
+      }
+      html[data-theme='shopify'] .tw-overflow-hidden.tw-rounded-ds-xl.tw-bg-ds-neutral-0 {
+        border-radius: var(--sp-radius-card);
+        box-shadow: var(--sp-shadow-card);
+      }
+      html[data-theme='shopify'] .tw-overflow-hidden.tw-rounded-ds-xl.tw-bg-ds-neutral-0 :focus-visible {
+        outline-offset: -3px;
       }
     </style>
     <!-- PROTO:EDIT-END head -->
@@ -138312,7 +138336,7 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
           '      Odkaz vede na <code>{{ $route.fullPath }}</code>. Propojené jsou: homepage,',
           '      kategorie (L1/L2), detail produktu, košík a pokladna.',
           '    </p>',
-          '    <ds-button variant="primary" @click="$router.push(\'/\')">Zpět na homepage</ds-button>',
+          '    <ds-button variant="primary" @click="$router.push(\'/home\')">Zpět na homepage</ds-button>',
           '  </main>',
           '</div>',
         ].join('\n'),
@@ -138322,6 +138346,8 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
         history: createWebHashHistory(),
         routes: [
           { path: '/', redirect: '/basket' },
+          // PROTOTYPE: homepage reachable at #/home (the root still opens the basket)
+          { path: '/home', component: SpaPageHomepage },
           { path: '/basket', component: SpaPageBasket },
           { path: '/cashdesk', component: SpaPageCashdesk },
           { path: '/:categoryUrl(c\\d+.*)', component: SpaCategoryDispatch },
