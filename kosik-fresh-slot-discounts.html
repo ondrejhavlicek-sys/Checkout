@@ -301,6 +301,86 @@
       html[data-theme='shopify'] .tw-overflow-hidden.tw-rounded-ds-xl.tw-bg-ds-neutral-0 :focus-visible {
         outline-offset: -3px;
       }
+
+      /* ---- category menus ----
+         Desktop mega menu: already white rows with a grey hover and a purple bar on the
+         active row (that bar is a state marker and stays); only the hairlines, radii and
+         panel corners are aligned with the theme. */
+      html[data-theme='shopify'] .ds-main-nav-panel-container {
+        border-color: var(--sp-border);
+        border-bottom-left-radius: var(--sp-radius-card);
+        border-bottom-right-radius: var(--sp-radius-card);
+      }
+      html[data-theme='shopify'] .ds-main-nav-panel-container .tw-border-r.tw-border-r-ds-neutral-10 {
+        border-right-color: var(--sp-border);
+      }
+      html[data-theme='shopify'] .ds-main-nav-panel-container a.tw-rounded-ds-lg {
+        border-radius: var(--sp-radius-control);
+      }
+      /* Mobile "Kategorie" menu (legacy .mobile-header__sidebar styles): the lilac list
+         becomes white rows divided by hairlines. The open / current row is marked with a
+         light-grey fill and a purple bar (the same marker as the desktop menu). */
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-top {
+        background: #fff;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-item {
+        padding: 0;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-link {
+        border: 0;
+        border-bottom: 1px solid var(--sp-border);
+        border-radius: 0;
+        /* keeps the text where it was (was 2 px item padding + 1 px border + 10 px) */
+        padding-left: 13px;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-arrow-toggle {
+        border-right: 0;
+        border-left: 1px solid var(--sp-border);
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-link--open,
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-link--current {
+        background-color: var(--sp-holder);
+        box-shadow: inset 3px 0 0 var(--ds-context-primary);
+        font-weight: 650;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-l2__category {
+        border-color: var(--sp-border);
+      }
+      /* the 2 px item padding is gone, so the nested text gets it back (text stays put) */
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-l2__title {
+        padding-left: 12px;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-l3__link {
+        border-top-color: var(--sp-border);
+        padding-left: 42px;
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .nav-l3__link + .nav-l3__link::before {
+        background: linear-gradient(to right, #fff 40px, var(--sp-border) 40px, #fff 75%);
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu {
+        border-top-color: var(--sp-border);
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu__title-wrapper,
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu-item {
+        border-bottom-color: var(--sp-border);
+      }
+      html[data-theme='shopify'] .mobile-header__sidebar .action-menu__arrow-wrap {
+        border-right-color: var(--sp-border);
+        border-left-color: var(--sp-border);
+      }
+      @media (hover: hover) {
+        html[data-theme='shopify'] .mobile-header__sidebar .nav-link:hover,
+        html[data-theme='shopify'] .mobile-header__sidebar .nav-l2__title:hover,
+        html[data-theme='shopify'] .mobile-header__sidebar .nav-l3__link:hover,
+        html[data-theme='shopify'] .mobile-header__sidebar .action-menu-item:hover {
+          background-color: var(--sp-holder);
+          color: inherit;
+        }
+      }
+      /* focus rings in the menu are drawn inside the (clipped, full-width) rows */
+      html[data-theme='shopify'] .mobile-header__sidebar :focus-visible {
+        outline-offset: -3px;
+      }
     </style>
     <!-- PROTO:EDIT-END head -->
 
@@ -121968,6 +122048,8 @@ body :where([data-proto='app-icon']) {
   // grey cell + the price in a light-green cell). Used by the drawer cell, the delivery
   // tile and the transport row of the price summary, so the three look identical.
   // The icon alone does not carry the reason: callers add visually hidden text.
+  // Price text uses DS token ds-contrast-green-dark (#136941) instead of ds-state-success
+  // (#198754): 6.49:1 on the #F2FEF6 tint instead of 4.38:1 (AA needs 4.5:1).
   // ---------------------------------------------------------------------------
   ProtoKit.SlotDiscountChip = {
     props: {
@@ -121986,7 +122068,7 @@ body :where([data-proto='app-icon']) {
             :style="reason.iconStyle"></component>
         </span>
         <span
-          class="tw-flex tw-items-center tw-bg-ds-tint-highlight-green tw-px-1.5 tw-text-style-strong tw-text-ds-state-success">
+          class="tw-flex tw-items-center tw-bg-ds-tint-highlight-green tw-px-1.5 tw-text-style-strong tw-text-ds-contrast-green-dark">
           {{ text }}
         </span>
       </span>
