@@ -195,12 +195,10 @@
         border-radius: var(--sp-radius-control);
         font-weight: 650;
       }
-      /* plain links keep the kit's purple (.tw-text-ds-link, a.tw-text-ds-primary): nothing to
-         override. Underlined text buttons ("Zobrazit více", the delivery time link) inherit the
-         page text colour in the kit, so they are set to the primary purple here. */
-      html[data-theme='shopify'] button.tw-underline {
-        color: var(--ds-context-primary);
-      }
+      /* plain links keep the kit's purple (.tw-text-ds-link, a.tw-text-ds-primary) and the
+         underlined text buttons keep the kit colours too: nothing to override. ("Zobrazit více ›"
+         on category pages is black in the kit, "dnes už od 19:00" and "Jak to funguje?" are
+         purple in the kit.) */
       /* focus: a clear purple outline on every focusable element (the kit's rings are
          purple / green / black per component). The 2 px offset keeps a white gap between the
          ring and filled purple controls, so the ring stays visible next to them. */
