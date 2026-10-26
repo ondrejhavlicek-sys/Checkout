@@ -100,21 +100,25 @@
         --sp-blue: #005cd1;
         --sp-text: #000;
         --sp-muted: #707070;
-        --sp-border: #ececec;
+        --sp-border: #e5e5e5;
         --sp-border-strong: #dfdfdf;
         --sp-holder: #f6f6f6;
+        --sp-hover: #f2f2f2;
         --sp-radius-card: 16px;
         --sp-radius-control: 12px;
-        --sp-shadow-card: 0 0 0 1px var(--sp-border), 0 1px 3px rgb(0 0 0 / 0.04);
+        /* card ring + soft shadow, fitted to the reference: offset 2 px, blur 12 px, 8 % */
+        --sp-shadow-card: 0 0 0 1px var(--sp-border), 0 2px 12px rgb(0 0 0 / 0.08);
+        /* smaller variant for boxes inside carousels / grids (clipped by the 4 px item padding) */
+        --sp-shadow-card-sm: 0 0 0 1px var(--sp-border), 0 1px 4px rgb(0 0 0 / 0.08);
 
         /* Fresh button variables: secondary = white, light border, bold blue text; ghost =
            blue text. Primary and tertiary (filled) buttons are NOT touched. */
         --ds-button-secondary-background: #fff;
         --ds-button-secondary-border: var(--sp-border-strong);
         --ds-button-secondary-text: var(--sp-blue);
-        --ds-button-secondary-hover-background: var(--sp-holder);
+        --ds-button-secondary-hover-background: var(--sp-hover);
         --ds-button-ghost-text: var(--sp-blue);
-        --ds-button-ghost-hover-background: var(--sp-holder);
+        --ds-button-ghost-hover-background: var(--sp-hover);
       }
 
       /* page */
@@ -130,11 +134,11 @@
       html[data-theme='shopify'] .tw-text-ds-subtitle:not(:is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']), :is([data-tid='delivery-tile-discount-reason'],[data-tid='plus-status-strip'],[data-tid='delivery-tile-plus-status'],[data-tid='slot-discount-chip'],[data-tid='transport-discount-chip']) *) {
         color: var(--sp-muted);
       }
-      /* section headings: bold black, larger */
+      /* section headings: black, larger, DS "strong" weight (550) */
       html[data-theme='shopify'] section > .tw-text-style-lg-strong.tw-text-ds-title {
         font-size: 1.25rem;
         line-height: 1.75rem;
-        font-weight: 650;
+        font-weight: 550;
       }
 
       /* cards: white, hairline border, large radius, almost no shadow */
@@ -161,17 +165,8 @@
       html[data-theme='shopify'] [data-cid='ds-tile-extension-tile'] {
         border-bottom-color: var(--sp-border);
       }
-      /* icon holder in tiles: light-grey rounded square, black line icons */
-      html[data-theme='shopify'] [data-cid='ds-tile-icon'] {
-        background-color: var(--sp-holder);
-        border-radius: var(--sp-radius-control);
-        --ds-icon-fill-primary: #000;
-        --ds-icon-fill-secondary: #000;
-        color: #000;
-      }
-      html[data-theme='shopify'] [data-cid='ds-tile-icon'] svg.tw-text-ds-primary {
-        color: #000;
-      }
+      /* tile icon holders (DS Tile icon) are NOT themed: same holder, purple, two-tone icons as
+         in the default theme. Only the card around the tile follows the theme. */
 
       /* switches: outlined white track + grey knob when off (on-state keeps production colour) */
       html[data-theme='shopify'] [data-cid='ds-switch'] {
@@ -216,7 +211,7 @@
         background: #fff;
         border: 1px solid var(--sp-border);
         border-radius: var(--sp-radius-card);
-        box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+        box-shadow: var(--sp-shadow-card);
         overflow: hidden;
       }
       html[data-theme='shopify'] .checkout-custom .product-group__content > * + * {
@@ -228,7 +223,7 @@
       }
       html[data-theme='shopify'] .checkout-custom .product-group__title {
         color: var(--sp-text);
-        font-weight: 650;
+        font-weight: 550;
         font-size: 1.125rem;
         line-height: 1.5rem;
       }
@@ -257,11 +252,11 @@
       html[data-theme='shopify'] .tw-bg-ds-level-1.tw-rounded-ds-xl {
         background-color: #fff;
         border-radius: var(--sp-radius-card);
-        box-shadow: var(--sp-shadow-card);
+        box-shadow: var(--sp-shadow-card-sm);
       }
       html[data-theme='shopify'] article.product {
         border-radius: var(--sp-radius-card);
-        box-shadow: var(--sp-shadow-card);
+        box-shadow: var(--sp-shadow-card-sm);
       }
       html[data-theme='shopify'] a.tw-rounded-ds-xl,
       html[data-theme='shopify'] section.tw-bg-ds-discount,
@@ -277,7 +272,7 @@
       html[data-theme='shopify'] .title-section .title,
       html[data-theme='shopify'] .title-section h2 {
         color: var(--sp-text);
-        font-weight: 650;
+        font-weight: 550;
       }
       html[data-theme='shopify'] a.tw-text-ds-primary {
         color: var(--sp-blue);
@@ -302,7 +297,7 @@
       html[data-theme='shopify'] .tw-rounded-xl.tw-border.tw-border-ds-neutral-10 {
         border-color: var(--sp-border);
         border-radius: var(--sp-radius-card);
-        box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+        box-shadow: var(--sp-shadow-card);
       }
       /* underlined text buttons (e.g. delivery time in the info strip) are links too */
       html[data-theme='shopify'] button.tw-underline {
@@ -389,7 +384,7 @@
         html[data-theme='shopify'] .mobile-header__sidebar .nav-l2__title:hover,
         html[data-theme='shopify'] .mobile-header__sidebar .nav-l3__link:hover,
         html[data-theme='shopify'] .mobile-header__sidebar .action-menu-item:hover {
-          background-color: var(--sp-holder);
+          background-color: var(--sp-hover);
           color: inherit;
         }
       }
