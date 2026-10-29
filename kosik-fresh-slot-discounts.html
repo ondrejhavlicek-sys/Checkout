@@ -135249,13 +135249,19 @@ body :where([data-tid='address-banner']) strong { font-weight: 550; }
                 <div
                   v-show="cartProductsCount"
                   class="tw-grid tw-gap-x-5 tw-gap-y-4 md:tw-grid-cols-2">
-                  <div class="tw-space-y-4">
+                  <!-- PROTOTYPE: the voucher column is a flex column like the delivery
+                       column next to it (the grid already stretches both columns to the same
+                       height); the voucher tile grows to fill it, so the two tiles are
+                       equally tall at md+ whatever the delivery tile carries (Plus status
+                       strip, discount strip). Below md the columns stack and nothing grows. -->
+                  <div class="tw-flex tw-flex-col tw-gap-y-4">
                     <label
                       for="cashdesk-voucher-input"
                       class="tw-font-ds-strong tw-text-ds-title tw-text-style-lg">
                       Voucher
                     </label>
                     <voucher-tile
+                      class="tw-flex tw-grow tw-flex-col [&>.ds-tile]:tw-grow"
                       stacked
                       without-title
                       :voucher="voucher"
